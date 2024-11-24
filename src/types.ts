@@ -1,4 +1,3 @@
-
 interface PriceData {
   prices: [number, number][];
 }
