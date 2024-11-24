@@ -2,6 +2,7 @@ import axios from 'axios';
 import fs from 'fs/promises';
 import { parse } from 'csv-parse/sync';
 import { stringify } from 'csv-stringify/sync';
+import { existsSync } from 'fs';
 
 interface PriceData {
   prices: [number, number][];
@@ -289,19 +290,24 @@ async function main() {
   // Sort coinSummaries by totalCurrentValue in descending order
   coinSummaries.sort((a, b) => b.totalCurrentValue - a.totalCurrentValue);
 
-  // Find the longest coin name for proper padding
-  const maxCoinLength = Math.max(...coinSummaries.map(summary => summary.coin.length));
+  console.log("\nSaving sorted results");
+  const currentDate = new Date().toISOString().split('T')[0];
+  const currentYear = currentDate.split('-')[0];
+  const currentMonth = currentDate.split('-')[1];
 
-  // Print the sorted results as a table
-  console.log("\nSorted Results:");
-  console.log("-".repeat(maxCoinLength + 28)); // Adjust the line length
-  console.log(`| ${"Cryptocurrency".padEnd(maxCoinLength)} | Total Current Value |`);
-  console.log("-".repeat(maxCoinLength + 28)); // Adjust the line length
-  coinSummaries.forEach(summary => {
-    const formattedValue = summary.totalCurrentValue.toFixed(2);
-    console.log(`| ${summary.coin.padEnd(maxCoinLength)} | $${formattedValue.padStart(18)} |`);
-  });
-  console.log("-".repeat(maxCoinLength + 28)); // Adjust the line length
+  if (!existsSync(`results/${currentYear}`)) {
+    await fs.mkdir(`results/${currentYear}`);
+  }
+  if (!existsSync(`results/${currentYear}/${currentMonth}`)) {
+    await fs.mkdir(`results/${currentYear}/${currentMonth}`);
+  }
+
+  const today_results_filename = `results/${currentYear}/${currentMonth}/${currentDate}.csv`;
+  const csvContent = stringify(coinSummaries, { header: true });
+  await fs.writeFile(today_results_filename, csvContent, 'utf-8');
+  console.log(`Results saved to ${today_results_filename}`);
 }
 
 main();
+
+
