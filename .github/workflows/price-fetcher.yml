@@ -1,0 +1,32 @@
+name: Daily Price Fetcher
+
+on:
+    schedule: [{cron: "0 0 * * *"}]
+    workflow_dispatch:
+
+jobs:
+  fetch-prices:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run price fetcher
+        run: ./node_modules/.bin/ts-node price_fetcher.ts
+
+      - name: Get current date_time
+        id: date_time
+        run: echo "date_time=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "update for ${{ steps.date_time.outputs.date_time }}"
