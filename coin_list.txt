@@ -60,7 +60,6 @@ liquity
 mina-protocol
 kerosene
 layerzero
-xnet-mobile-2
 optimism
 uniswap
 dymension
@@ -87,7 +86,6 @@ pixels
 thena
 wazirx
 flow
-jupiter
 alephium
 paraswap
 kaspa
@@ -96,7 +94,6 @@ kujira
 eden
 self-chain
 # apu-apustaja
-harrypotterobamasonic10inu
 # saga
 # openlm-revshare-token
 # dogwifhat
@@ -132,3 +129,7 @@ empyreal
 
 wojak
 
+#xrp
+stellar
+cardano
+kusama
