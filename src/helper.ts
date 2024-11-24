@@ -1,5 +1,5 @@
 import fs from 'fs/promises';
-import { LowestPrice } from './types';
+import { LowestPriceWithDate } from './types';
 
 async function ensureDirectoryExists(dirPath: string): Promise<void> {
   try {
@@ -11,7 +11,7 @@ async function ensureDirectoryExists(dirPath: string): Promise<void> {
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-function findLowestPrice(priceData: [number, number][]): LowestPrice {
+function findLowestPrice(priceData: [number, number][]): LowestPriceWithDate {
   let lowestPrice = Infinity;
   let lowestPriceDate = new Date();
 

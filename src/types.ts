@@ -2,7 +2,7 @@ interface PriceData {
   prices: [number, number][];
 }
 
-interface LowestPrice {
+interface LowestPriceWithDate {
   date: Date;
   price: number;
 }
@@ -41,8 +41,8 @@ interface CoinSummary {
 
 interface CoinData {
   coin: string;
-  lowestPrices: { [period: string]: LowestPrice };
+  lowestPrices: { [period: string]: LowestPriceWithDate };
   currentPrice?: number;
 }
 
-export { PriceDataRecord, Period, PriceData, LowestPrice, CoinData, InvestmentResult, InvestmentSummary, CoinSummary };
+export { PriceDataRecord, Period, PriceData, LowestPriceWithDate, CoinData, InvestmentResult, InvestmentSummary, CoinSummary };

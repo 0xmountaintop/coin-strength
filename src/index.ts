@@ -2,13 +2,13 @@ import axios from 'axios';
 import fs from 'fs/promises';
 import { stringify } from 'csv-stringify/sync';
 import { COIN_LIST_FILE, periods } from './config';
-import { PriceDataRecord, Period, LowestPrice, CoinData, InvestmentResult, InvestmentSummary, CoinSummary } from './types';
+import { PriceDataRecord, Period, LowestPriceWithDate, CoinData, InvestmentResult, InvestmentSummary, CoinSummary } from './types';
 import { ensureDirectoryExists, findLowestPrice } from './helper';
 import { writePriceData, readCoinsFromFile, readPriceData } from './files';
 import { fetchCryptoPricesWithRetry, fetchCurrentPriceWithRetry } from './api';
 
 
-async function fetchLowestPriceAndSave(coin: string, period: Period, csvData: PriceDataRecord[]): Promise<LowestPrice> {
+async function fetchLowestPriceAndSave(coin: string, period: Period, csvData: PriceDataRecord[]): Promise<LowestPriceWithDate> {
   const existingRecord = csvData.find(
     record => record.coin === coin &&
               record.periodStart === period.start.toISOString() &&
@@ -45,7 +45,7 @@ async function fetchLowestPrices(coins: string[], periods: Period[], csvData: Pr
   const coinDataList: CoinData[] = [];
 
   for (const coin of coins) {
-    const lowestPrices: { [period: string]: LowestPrice } = {};
+    const lowestPrices: { [period: string]: LowestPriceWithDate } = {};
     for (const period of periods) {
       const lowestPrice = await fetchLowestPriceAndSave(coin, period, csvData);
       const periodKey = `${period.start.toISOString()}_${period.end.toISOString()}`;
