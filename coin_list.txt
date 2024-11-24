@@ -133,3 +133,4 @@ wojak
 stellar
 cardano
 kusama
+# mantra
