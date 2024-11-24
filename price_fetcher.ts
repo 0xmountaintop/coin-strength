@@ -292,22 +292,22 @@ async function main() {
 
   console.log("\nSaving sorted results");
   const currentDate = new Date().toISOString().split('T')[0];
-  const currentYear = currentDate.split('-')[0];
-  const currentMonth = currentDate.split('-')[1];
-
-  if (!existsSync(`results/${currentYear}`)) {
-    await fs.mkdir(`results/${currentYear}`);
-  }
-  if (!existsSync(`results/${currentYear}/${currentMonth}`)) {
-    await fs.mkdir(`results/${currentYear}/${currentMonth}`);
-  }
-
-  const today_results_filename = `results/${currentYear}/${currentMonth}/${currentDate}.csv`;
+  const [currentYear, currentMonth] = currentDate.split('-');
+  const todayResultPath = `results/${currentYear}/${currentMonth}`;
+  await ensureDirectoryExists(todayResultPath);  
+  const todayResultFilename = `${todayResultPath}/${currentDate}.csv`;
   const csvContent = stringify(coinSummaries, { header: true });
-  await fs.writeFile(today_results_filename, csvContent, 'utf-8');
-  console.log(`Results saved to ${today_results_filename}`);
+  await fs.writeFile(todayResultFilename, csvContent, 'utf-8');
+  console.log(`Results saved to ${todayResultFilename}`);
 }
 
+async function ensureDirectoryExists(dirPath: string): Promise<void> {
+    try {
+        await fs.access(dirPath);
+    } catch {
+        await fs.mkdir(dirPath, { recursive: true });
+    }
+}
+
+
 main();
-
-
