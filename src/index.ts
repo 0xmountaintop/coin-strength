@@ -4,8 +4,8 @@ import { stringify } from 'csv-stringify/sync';
 import { COIN_LIST_FILE, periods } from './config';
 import { PriceDataRecord, Period, LowestPriceWithDate, CoinData, InvestmentResult, InvestmentSummary, CoinSummary } from './types';
 import { ensureDirectoryExists, findLowestPrice } from './helper';
-import { writePriceData, readCoinsFromFile, readPriceData } from './files';
-import { fetchCryptoPricesWithRetry, fetchCurrentPriceWithRetry } from './api';
+import { writePriceData, readCoinsFromFile, readPriceData } from './services/files';
+import { fetchHistoricalPricesWithRetry, fetchCurrentPriceWithRetry } from './services/coingecko';
 
 
 async function fetchLowestPriceAndSave(coin: string, period: Period, csvData: PriceDataRecord[]): Promise<LowestPriceWithDate> {
@@ -24,7 +24,7 @@ async function fetchLowestPriceAndSave(coin: string, period: Period, csvData: Pr
   }
 
   console.log(`Fetching new data for ${coin} in period ${period.start.toISOString()} to ${period.end.toISOString()}`);
-  const newData = await fetchCryptoPricesWithRetry(coin, period);
+  const newData = await fetchHistoricalPricesWithRetry(coin, period);
   const lowestPrice = findLowestPrice(newData.prices);
 
   const newRecord: PriceDataRecord = {

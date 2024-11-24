@@ -45,4 +45,13 @@ interface CoinData {
   currentPrice?: number;
 }
 
-export { PriceDataRecord, Period, PriceData, LowestPriceWithDate, CoinData, InvestmentResult, InvestmentSummary, CoinSummary };
+export {
+    PriceDataRecord,
+    Period,
+    PriceData,
+    LowestPriceWithDate,
+    CoinData,
+    InvestmentResult,
+    InvestmentSummary,
+    CoinSummary
+};

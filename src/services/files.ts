@@ -1,5 +1,5 @@
-import { PRICE_DATA_FILE } from "./config";
-import { PriceDataRecord } from "./types";
+import { PRICE_DATA_FILE } from "../config";
+import { PriceDataRecord } from "../types";
 import { parse } from 'csv-parse/sync';
 import fs from 'fs/promises';
 import { stringify } from 'csv-stringify/sync';

@@ -1,6 +1,6 @@
 import axios from "axios";
-import { Period, PriceData } from "./types";
-import { delay } from "./helper";
+import { Period, PriceData } from "../types";
+import { delay } from "../helper";
 
 const API_CONFIG = {
   baseUrl: 'https://api.coingecko.com/api/v3',
@@ -29,7 +29,7 @@ async function withRetry<T>(
   throw new Error(`Failed after ${maxRetries} attempts: ${errorMessage}`);
 }
 
-async function fetchCryptoPricesWithRetry(
+async function fetchHistoricalPricesWithRetry(
   coinId: string, 
   period: Period, 
   maxRetries: number = 3
@@ -66,4 +66,4 @@ async function fetchCurrentPriceWithRetry(
   );
 }
 
-export { fetchCryptoPricesWithRetry, fetchCurrentPriceWithRetry };
+export { fetchHistoricalPricesWithRetry, fetchCurrentPriceWithRetry };
