@@ -10,4 +10,4 @@ install:
 
 run: $(COIN_LIST)
 	@echo "Running price_fetcher..."
-	@$(TS_NODE) price_fetcher.ts
+	@$(TS_NODE) src/index.ts
