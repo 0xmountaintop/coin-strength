@@ -21,7 +21,7 @@ jobs:
         run: yarn install
 
       - name: Run price fetcher
-        run: ./node_modules/.bin/ts-node price_fetcher.ts
+        run: ./node_modules/.bin/ts-node src/index.ts
 
       - name: Get current date_time
         id: date_time
