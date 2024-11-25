@@ -34,7 +34,7 @@ async function fetchHistoricalPricesWithRetry(
   coinId: string, 
   period: Period, 
   maxRetries: number = 3
-): Promise<CoingeckoMarketChartResp> {
+): Promise<[number, number][]> {
   const startTimestamp = Math.floor(period.start.getTime() / 1000);
   const endTimestamp = Math.floor(period.end.getTime() / 1000);
 
@@ -45,7 +45,7 @@ async function fetchHistoricalPricesWithRetry(
         from: startTimestamp,
         to: endTimestamp,
       },
-    }).then(response => response.data),
+    }).then(response => response.data.prices),
     `Failed to fetch historical data for ${coinId}`,
     maxRetries
   );

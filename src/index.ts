@@ -24,8 +24,8 @@ async function fetchLowestPriceAndSave(coin: string, period: Period, csvData: Pr
   }
 
   console.log(`Fetching new data for ${coin} in period ${period.start.toISOString()} to ${period.end.toISOString()}`);
-  const newData = await fetchHistoricalPricesWithRetry(coin, period);
-  const lowestPrice = findLowestPrice(newData.prices);
+  const historicalPrices = await fetchHistoricalPricesWithRetry(coin, period);
+  const lowestPrice = findLowestPrice(historicalPrices);
 
   const newRecord: PriceDataRecord = {
     coin,
