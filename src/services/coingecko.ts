@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Period, PriceData } from "../types";
+import { Period, CoingeckoMarketChartResp } from "../types";
 import { delay } from "../helper";
 
 const API_CONFIG = {
@@ -33,12 +33,12 @@ async function fetchHistoricalPricesWithRetry(
   coinId: string, 
   period: Period, 
   maxRetries: number = 3
-): Promise<PriceData> {
+): Promise<CoingeckoMarketChartResp> {
   const startTimestamp = Math.floor(period.start.getTime() / 1000);
   const endTimestamp = Math.floor(period.end.getTime() / 1000);
 
   return withRetry(
-    () => axios.get<PriceData>(`${API_CONFIG.baseUrl}/coins/${coinId}/market_chart/range`, {
+    () => axios.get<CoingeckoMarketChartResp>(`${API_CONFIG.baseUrl}/coins/${coinId}/market_chart/range`, {
       params: {
         vs_currency: 'usd',
         from: startTimestamp,

@@ -17,7 +17,7 @@ async function readCoinsFromFile(filename: string): Promise<string[]> {
   }
 }
 
-async function readPriceData(): Promise<PriceDataRecord[]> {
+async function readPriceDataRecords(): Promise<PriceDataRecord[]> {
   try {
     const csvContent = await fs.readFile(PRICE_DATA_FILE, 'utf-8');
     return parse(csvContent, { columns: true, cast: true }) as PriceDataRecord[];
@@ -29,9 +29,9 @@ async function readPriceData(): Promise<PriceDataRecord[]> {
   }
 }
 
-async function writePriceData(records: PriceDataRecord[]): Promise<void> {
+async function writePriceDataRecords(records: PriceDataRecord[]): Promise<void> {
   const csvContent = stringify(records, { header: true });
   await fs.writeFile(PRICE_DATA_FILE, csvContent, 'utf-8');
 }
 
-export { readPriceData, writePriceData, readCoinsFromFile };
+export { readPriceDataRecords, writePriceDataRecords, readCoinsFromFile };

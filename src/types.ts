@@ -1,4 +1,5 @@
-interface PriceData {
+interface CoingeckoMarketChartResp {
+  // array of [timestamp, price]
   prices: [number, number][];
 }
 
@@ -29,12 +30,12 @@ interface InvestmentResult {
   profitLossPercentage: number;
 }
 
-interface InvestmentSummary {
+interface InvestmentReport {
   results: InvestmentResult[];
   totalCurrentValue: number;
 }
 
-interface CoinSummary {
+interface CoinInvestmentSummary {
   coin: string;
   totalCurrentValue: number;
 }
@@ -48,10 +49,10 @@ interface CoinData {
 export {
     PriceDataRecord,
     Period,
-    PriceData,
+    CoingeckoMarketChartResp,
     LowestPriceWithDate,
     CoinData,
     InvestmentResult,
-    InvestmentSummary,
-    CoinSummary
+    InvestmentReport,
+    CoinInvestmentSummary
 };
