@@ -19,7 +19,8 @@ async function withRetry<T>(
       await delay(API_CONFIG.rateLimitDelay);
       return result;
     } catch (error) {
-      console.error(`Attempt ${attempt} ${errorMessage}:`, error);
+      // console.error(`Attempt ${attempt} ${errorMessage}:`, error);
+      console.error(`Attempt ${attempt} ${errorMessage}:`);
       if (attempt === maxRetries) throw error;
       
       console.log(`Retrying in ${API_CONFIG.retryDelay / 1000} seconds...`);
