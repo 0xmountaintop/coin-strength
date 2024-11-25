@@ -1,7 +1,9 @@
-## seems inaccurate
-# jupiter
+## coins too new
+# simon-s-cat
 # xnet-mobile-2
-# harrypotterobamasonic10inu
+# hilo-2
+# morphware
+# chasm
 
 # --------------------------------
 
@@ -9,6 +11,7 @@ bitcoin
 solana
 ethereum
 spx6900
+harrypotterobamasonic10in
 woman-yelling-at-cat
 fwog
 gigachad-2
@@ -93,23 +96,21 @@ natix-network
 kujira
 eden
 self-chain
-# apu-apustaja
-# saga
-# openlm-revshare-token
-# dogwifhat
-# sei
-# simons-cat
-# mew
-# conflux
-# render
+apu-s-club
+saga-2
+ora-protocol
+dogwifcoin
+sei-network
+cat-in-a-dogs-world
+conflux-token
+render-token
 io
-# injective
-# theta-network
-# fusionist
-# toncoin
-# jito
-# vertex-2
-# dogs
+injective-protocol
+theta-token
+endurance
+the-open-network
+jito-governance-token
+vertex-protocol
 aura-on-sol
 monkeyhaircut
 iiii-lovvv-youuuu
@@ -119,18 +120,18 @@ clearpool
 elastic-finance-token
 carbify
 illuminex
-# hilo-2
 dubbz
 
 nosana
-# morphware
 empyreal
-# chasm
 
 wojak
 
-#xrp
+ripple
 stellar
 cardano
 kusama
-# mantra
+mantra-dao
+
+jupiter-exchange-solana
+arbitrum
