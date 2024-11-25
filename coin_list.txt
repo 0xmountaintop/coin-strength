@@ -135,3 +135,8 @@ mantra-dao
 
 jupiter-exchange-solana
 arbitrum
+
+stader
+instadapp
+drift-protocol
+virtual-protocol
