@@ -30,12 +30,12 @@ interface InvestmentResult {
   profitLossPercentage: number;
 }
 
-interface InvestmentReport {
+interface CoinInvestmentsReport {
   results: InvestmentResult[];
   totalCurrentValue: number;
 }
 
-interface CoinInvestmentSummary {
+interface CoinInvestmentsSummary {
   coin: string;
   totalCurrentValue: number;
 }
@@ -53,6 +53,6 @@ export {
     LowestPriceWithDate,
     CoinData,
     InvestmentResult,
-    InvestmentReport,
-    CoinInvestmentSummary
+    CoinInvestmentsReport,
+    CoinInvestmentsSummary
 };

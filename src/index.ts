@@ -2,7 +2,7 @@ import axios from 'axios';
 import fs from 'fs/promises';
 import { stringify } from 'csv-stringify/sync';
 import { COIN_LIST_FILE, periods } from './config';
-import { PriceDataRecord, Period, LowestPriceWithDate, CoinData, InvestmentResult, InvestmentReport, CoinInvestmentSummary } from './types';
+import { PriceDataRecord, Period, LowestPriceWithDate, CoinData, InvestmentResult, CoinInvestmentsReport, CoinInvestmentsSummary } from './types';
 import { ensureDirectoryExists, findLowestPrice } from './helper';
 import { writePriceDataRecords, readCoinsFromFile, readPriceDataRecords } from './services/files';
 import { fetchHistoricalPricesWithRetry, fetchCurrentPriceWithRetry } from './services/coingecko';
@@ -68,7 +68,7 @@ async function fetchCurrentPrices(coinDataList: CoinData[]): Promise<void> {
   }
 }
 
-function calculateInvestmentResults(coinData: CoinData, periods: Period[]): InvestmentReport {
+function calculateInvestmentResults(coinData: CoinData, periods: Period[]): CoinInvestmentsReport {
   const results: InvestmentResult[] = [];
   let totalCurrentValue = 0;
 
@@ -116,7 +116,7 @@ async function main() {
   await fetchCurrentPrices(coinDataList);
 
   // Calculate investment results
-  const coinFinalSummaries: CoinInvestmentSummary[] = [];
+  const coinInvestmentsSummaries: CoinInvestmentsSummary[] = [];
   for (const coinData of coinDataList) {
     console.log(`Investment results for ${coinData.coin}:`);
     try {
@@ -126,7 +126,7 @@ async function main() {
         console.log(`Current Value: $${result.currentValue.toFixed(2)}`);
       });
       console.log(`Total Current Value for all periods: $${totalCurrentValue.toFixed(2)}`);
-      coinFinalSummaries.push({ coin: coinData.coin, totalCurrentValue });
+      coinInvestmentsSummaries.push({ coin: coinData.coin, totalCurrentValue });
     } catch (error) {
       console.error(`Failed to calculate investment results for ${coinData.coin}:`, error instanceof Error ? error.message : String(error));
     }
@@ -134,7 +134,7 @@ async function main() {
   }
 
   // Sort coinSummaries by totalCurrentValue in descending order
-  coinFinalSummaries.sort((a, b) => b.totalCurrentValue - a.totalCurrentValue);
+  coinInvestmentsSummaries.sort((a, b) => b.totalCurrentValue - a.totalCurrentValue);
 
   console.log("\nSaving sorted results");
   const currentDate = new Date().toISOString().split('T')[0];
@@ -142,7 +142,7 @@ async function main() {
   const todayResultPath = `results/${currentYear}/${currentMonth}`;
   await ensureDirectoryExists(todayResultPath);  
   const todayResultFilename = `${todayResultPath}/${currentDate}.csv`;
-  const csvContent = stringify(coinFinalSummaries, { header: true });
+  const csvContent = stringify(coinInvestmentsSummaries, { header: true });
   await fs.writeFile(todayResultFilename, csvContent, 'utf-8');
   console.log(`Results saved to ${todayResultFilename}`);
 }
