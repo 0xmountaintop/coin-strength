@@ -51,18 +51,42 @@ async function fetchHistoricalPricesWithRetry(
   );
 }
 
+// async function fetchCurrentPriceWithRetry(
+//   coinId: string, 
+//   maxRetries: number = 3
+// ): Promise<number> {
+//   return withRetry(
+//     () => axios.get(`${API_CONFIG.baseUrl}/simple/price`, {
+//       params: {
+//         ids: coinId,
+//         vs_currencies: 'usd',
+//       },
+//     }).then(response => response.data[coinId].usd),
+//     `Failed to fetch current price for ${coinId}`,
+//     maxRetries
+//   );
+// }
+
 async function fetchCurrentPriceWithRetry(
   coinId: string, 
   maxRetries: number = 3
 ): Promise<number> {
+  // read DATE from env or yesterday's 23:00 timestamp
+  const date = process.env.DATE || new Date().toISOString().split('T')[0];
+  const startTimestamp = Math.floor(new Date(`${date}T00:00:00Z`).getTime() / 1000) - 3600;
+  const endTimestamp = startTimestamp+1000;
+
+  console.log(`Fetching ${coinId} price at ${date}`);
+
   return withRetry(
-    () => axios.get(`${API_CONFIG.baseUrl}/simple/price`, {
+    () => axios.get<CoingeckoMarketChartResp>(`${API_CONFIG.baseUrl}/coins/${coinId}/market_chart/range`, {
       params: {
-        ids: coinId,
-        vs_currencies: 'usd',
+        vs_currency: 'usd',
+        from: startTimestamp,
+        to: endTimestamp,
       },
-    }).then(response => response.data[coinId].usd),
-    `Failed to fetch current price for ${coinId}`,
+    }).then(response => response.data.prices[0][1]),
+    `Failed to fetch current data for ${coinId}, start: ${startTimestamp}, end: ${endTimestamp}`,
     maxRetries
   );
 }

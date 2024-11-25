@@ -3,6 +3,11 @@ name: Daily Price Fetcher
 on:
     schedule: [{cron: "0 0 * * *"}]
     workflow_dispatch:
+      inputs:
+        DATE:
+          description: The date to fetch prices for, format `YYYY-MM-DD`.
+          required: false
+          type: string
 
 jobs:
   fetch-prices:
@@ -23,9 +28,12 @@ jobs:
       - name: Run price fetcher
         run: ./node_modules/.bin/ts-node src/index.ts
 
-      - name: Get current date_time
+      - name: Get date_time
         id: date_time
-        run: echo "date_time=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+        env:
+          DATE: ${{ github.event.inputs.DATE }}
+        ## read DATE from env, if set, use it as the date, otherwise use today's date
+        run: echo "date_time=$(if [ -z \"$DATE\" ]; then date +'%Y-%m-%d'; else $DATE; fi)" >> $GITHUB_OUTPUT
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
