@@ -1,95 +1,119 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { Period, CoingeckoMarketChartResp } from "../types";
 import { delay } from "../helper";
 import { DATE } from "../config";
 
-const API_CONFIG = {
+interface CoinGeckoConfig {
+  baseUrl: string;
+  rateLimitDelay: number;
+  retryDelay: number;
+  maxRetries: number;
+}
+
+const DEFAULT_CONFIG: CoinGeckoConfig = {
   baseUrl: 'https://api.coingecko.com/api/v3',
   rateLimitDelay: 1000,  // 1 second
   retryDelay: 60000,     // 1 minute
+  maxRetries: 3,
 };
 
-async function withRetry<T>(
-  operation: () => Promise<T>,
-  errorMessage: string,
-  maxRetries: number = 3
-): Promise<T> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const result = await operation();
-      await delay(API_CONFIG.rateLimitDelay);
-      return result;
-    } catch (error) {
-      // console.error(`Attempt ${attempt} ${errorMessage}:`, error);
-      console.error(`Attempt ${attempt} ${errorMessage}`);
-      if (attempt === maxRetries) throw error;
-      
-      console.log(`Retrying in ${API_CONFIG.retryDelay / 1000} seconds...`);
-      await delay(API_CONFIG.retryDelay);
-    }
+class CoinGeckoAPI {
+  private readonly config: CoinGeckoConfig;
+  private readonly client: AxiosInstance;
+
+  constructor(config: Partial<CoinGeckoConfig> = {}) {
+    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.client = axios.create({
+      baseURL: this.config.baseUrl,
+    });
   }
-  throw new Error(`Failed after ${maxRetries} attempts: ${errorMessage}`);
-}
 
-async function fetchHistoricalPricesWithRetry(
-  coinId: string, 
-  period: Period, 
-  maxRetries: number = 3
-): Promise<[number, number][]> {
-  const startTimestamp = Math.floor(period.start.getTime() / 1000);
-  const endTimestamp = Math.floor(period.end.getTime() / 1000);
+  private async withRetry<T>(
+    operation: () => Promise<T>,
+    errorMessage: string,
+  ): Promise<T> {
+    for (let attempt = 1; attempt <= this.config.maxRetries; attempt++) {
+      try {
+        const result = await operation();
+        await delay(this.config.rateLimitDelay);
+        return result;
+      } catch (error) {
+        console.error(`Attempt ${attempt} ${errorMessage}`);
+        
+        if (attempt === this.config.maxRetries) {
+          throw error;
+        }
+        
+        console.log(`Retrying in ${this.config.retryDelay / 1000} seconds...`);
+        await delay(this.config.retryDelay);
+      }
+    }
+    throw new Error(`Failed after ${this.config.maxRetries} attempts: ${errorMessage}`);
+  }
 
-  return withRetry(
-    () => axios.get<CoingeckoMarketChartResp>(`${API_CONFIG.baseUrl}/coins/${coinId}/market_chart/range`, {
-      params: {
-        vs_currency: 'usd',
-        from: startTimestamp,
-        to: endTimestamp,
+  async getHistoricalPrices(coinId: string, period: Period): Promise<[number, number][]> {
+    const startTimestamp = Math.floor(period.start.getTime() / 1000);
+    const endTimestamp = Math.floor(period.end.getTime() / 1000);
+
+    return this.withRetry(
+      async () => {
+        const response = await this.client.get<CoingeckoMarketChartResp>(`/coins/${coinId}/market_chart/range`, {
+          params: {
+            vs_currency: 'usd',
+            from: startTimestamp,
+            to: endTimestamp,
+          },
+        });
+        return response.data.prices;
       },
-    }).then(response => response.data.prices),
-    `Failed to fetch historical data for ${coinId}`,
-    maxRetries
-  );
-}
+      `Failed to fetch historical data for ${coinId}`
+    );
+  }
 
-// async function fetchCurrentPriceWithRetry(
-//   coinId: string, 
-//   maxRetries: number = 3
-// ): Promise<number> {
-//   return withRetry(
-//     () => axios.get(`${API_CONFIG.baseUrl}/simple/price`, {
-//       params: {
-//         ids: coinId,
-//         vs_currencies: 'usd',
-//       },
-//     }).then(response => response.data[coinId].usd),
-//     `Failed to fetch current price for ${coinId}`,
-//     maxRetries
+  async getCurrentPrice(coinId: string): Promise<number> {
+    const date = DATE;
+    const startTimestamp = Math.floor(new Date(`${date}T00:00:00Z`).getTime() / 1000) - 3600;
+    const endTimestamp = startTimestamp + 3600;
+
+    console.log(`Fetching ${coinId} price on ${date}`);
+
+    return this.withRetry(
+      async () => {
+        const response = await this.client.get<CoingeckoMarketChartResp>(`/coins/${coinId}/market_chart/range`, {
+          params: {
+            vs_currency: 'usd',
+            from: startTimestamp,
+            to: endTimestamp,
+          },
+        });
+        return response.data.prices[0][1];
+      },
+      `Failed to fetch current data (${date}) for ${coinId}, start: ${startTimestamp}, end: ${endTimestamp}`
+    );
+  }
+
+// async getCurrentPrice(coinId: string): Promise<number> {
+//   return this.withRetry(
+//     async () => {
+//       const response = await this.client.get(`/simple/price`, {
+//         params: {
+//       	ids: coinId,
+//       	vs_currencies: 'usd',
+//         },
+//       });
+//       return response.data[coinId].usd;
+//     },
+//     `Failed to fetch current price for ${coinId}`
 //   );
 // }
-
-async function fetchCurrentPriceWithRetry(
-  coinId: string, 
-  maxRetries: number = 3
-): Promise<number> {
-  // read DATE from env or yesterday's 23:00 timestamp
-  const date = DATE;
-  const startTimestamp = Math.floor(new Date(`${date}T00:00:00Z`).getTime() / 1000) - 3600;
-  const endTimestamp = startTimestamp+1000;
-
-  console.log(`Fetching ${coinId} price on ${date}`);
-
-  return withRetry(
-    () => axios.get<CoingeckoMarketChartResp>(`${API_CONFIG.baseUrl}/coins/${coinId}/market_chart/range`, {
-      params: {
-        vs_currency: 'usd',
-        from: startTimestamp,
-        to: endTimestamp,
-      },
-    }).then(response => response.data.prices[0][1]),
-    `Failed to fetch current data (${date}) for ${coinId}, start: ${startTimestamp}, end: ${endTimestamp}`,
-    maxRetries
-  );
 }
 
-export { fetchHistoricalPricesWithRetry, fetchCurrentPriceWithRetry };
+// Create a default instance
+const coinGeckoAPI = new CoinGeckoAPI();
+
+// Export the class and convenience methods that use the default instance
+export { CoinGeckoAPI };
+export const fetchHistoricalPricesWithRetry = (coinId: string, period: Period) => 
+  coinGeckoAPI.getHistoricalPrices(coinId, period);
+export const fetchCurrentPriceWithRetry = (coinId: string) => 
+  coinGeckoAPI.getCurrentPrice(coinId);
