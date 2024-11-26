@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Period, CoingeckoMarketChartResp } from "../types";
 import { delay } from "../helper";
+import { DATE } from "../config";
 
 const API_CONFIG = {
   baseUrl: 'https://api.coingecko.com/api/v3',
@@ -20,7 +21,7 @@ async function withRetry<T>(
       return result;
     } catch (error) {
       // console.error(`Attempt ${attempt} ${errorMessage}:`, error);
-      console.error(`Attempt ${attempt} ${errorMessage}:`);
+      console.error(`Attempt ${attempt} ${errorMessage}`);
       if (attempt === maxRetries) throw error;
       
       console.log(`Retrying in ${API_CONFIG.retryDelay / 1000} seconds...`);
@@ -72,7 +73,7 @@ async function fetchCurrentPriceWithRetry(
   maxRetries: number = 3
 ): Promise<number> {
   // read DATE from env or yesterday's 23:00 timestamp
-  const date = process.env.DATE || new Date().toISOString().split('T')[0];
+  const date = DATE;
   const startTimestamp = Math.floor(new Date(`${date}T00:00:00Z`).getTime() / 1000) - 3600;
   const endTimestamp = startTimestamp+1000;
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import fs from 'fs/promises';
 import { stringify } from 'csv-stringify/sync';
-import { COIN_LIST_FILE, periods } from './config';
+import { COIN_LIST_FILE, DATE, periods } from './config';
 import { PriceDataRecord, Period, LowestPriceWithDate, CoinData, InvestmentResult, CoinInvestmentsReport, CoinInvestmentsSummary } from './types';
 import { ensureDirectoryExists, findLowestPrice } from './helper';
 import { writePriceDataRecords, readCoinsFromFile, readPriceDataRecords } from './services/files';
@@ -61,9 +61,9 @@ async function fetchCurrentPrices(coinDataList: CoinData[]): Promise<void> {
   for (const coinData of coinDataList) {
     try {
       coinData.currentPrice = await fetchCurrentPriceWithRetry(coinData.coin);
-      console.log(`Fetched current price for ${coinData.coin}: $${coinData.currentPrice}`);
+      console.log(`Fetched current_date price (${DATE}) for ${coinData.coin}: $${coinData.currentPrice}`);
     } catch (error) {
-      console.error(`Failed to fetch current price for ${coinData.coin}:`, error);
+      console.error(`Failed to fetch current_date (${DATE}) price for ${coinData.coin}:`, error);
     }
   }
 }
@@ -137,7 +137,7 @@ async function main() {
   coinInvestmentsSummaries.sort((a, b) => b.totalCurrentValue - a.totalCurrentValue);
 
   console.log("\nSaving sorted results");
-  const currentDate = new Date().toISOString().split('T')[0];
+  const currentDate = DATE;
   const [currentYear, currentMonth] = currentDate.split('-');
   const todayResultPath = `results/${currentYear}/${currentMonth}`;
   await ensureDirectoryExists(todayResultPath);  
