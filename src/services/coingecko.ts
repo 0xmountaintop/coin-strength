@@ -72,7 +72,7 @@ class CoinGeckoAPI {
 
   async getCurrentPrice(coinId: string): Promise<number> {
     const date = DATE;
-    const startTimestamp = Math.floor(new Date(`${date}T00:00:00Z`).getTime() / 1000) - 3600;
+    const startTimestamp = Math.floor(new Date(`${date}T00:00:00Z`).getTime() / 1000);
     const endTimestamp = startTimestamp + 3600;
 
     console.log(`Fetching ${coinId} price on ${date}`);
