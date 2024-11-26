@@ -32,7 +32,7 @@ jobs:
 
       - name: Get today's date_time
         id: today_date_time
-        run: echo "date_time=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+        run: echo "date_time=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         ## if DATE is set, use it as the commit message, otherwise use today's date
