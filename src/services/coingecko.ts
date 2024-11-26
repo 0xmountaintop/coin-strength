@@ -77,7 +77,7 @@ async function fetchCurrentPriceWithRetry(
   const startTimestamp = Math.floor(new Date(`${date}T00:00:00Z`).getTime() / 1000) - 3600;
   const endTimestamp = startTimestamp+1000;
 
-  console.log(`Fetching ${coinId} price at ${date}`);
+  console.log(`Fetching ${coinId} price on ${date}`);
 
   return withRetry(
     () => axios.get<CoingeckoMarketChartResp>(`${API_CONFIG.baseUrl}/coins/${coinId}/market_chart/range`, {
@@ -87,7 +87,7 @@ async function fetchCurrentPriceWithRetry(
         to: endTimestamp,
       },
     }).then(response => response.data.prices[0][1]),
-    `Failed to fetch current data for ${coinId}, start: ${startTimestamp}, end: ${endTimestamp}`,
+    `Failed to fetch current data (${date}) for ${coinId}, start: ${startTimestamp}, end: ${endTimestamp}`,
     maxRetries
   );
 }
