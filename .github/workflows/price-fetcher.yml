@@ -27,14 +27,14 @@ jobs:
 
       - name: Run price fetcher
         run: ./node_modules/.bin/ts-node src/index.ts
-
-      - name: Get date_time
-        id: date_time
         env:
           DATE: ${{ github.event.inputs.DATE }}
-        ## read DATE from env, if set, use it as the date, otherwise use today's date
-        run: echo "date_time=$(if [ -z \"$DATE\" ]; then date +'%Y-%m-%d'; else $DATE; fi)" >> $GITHUB_OUTPUT
+
+      - name: Get today's date_time
+        id: today_date_time
+        run: echo "date_time=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
 
       - uses: stefanzweifel/git-auto-commit-action@v5
+        ## if DATE is set, use it as the commit message, otherwise use today's date
         with:
-          commit_message: "update for ${{ steps.date_time.outputs.date_time }}"
+          commit_message: "update for ${{ github.event.inputs.DATE || steps.today_date_time.outputs.date_time }}"
