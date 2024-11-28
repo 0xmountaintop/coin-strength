@@ -131,6 +131,27 @@
             border: none;
             font-size: 16px;
         }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3498db;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -250,6 +271,15 @@
         async function updateDisplay() {
             const dateStr = formatDate(currentDate);
             document.getElementById('currentDate').textContent = dateStr;
+            
+            // Show loading spinner
+            document.getElementById('tableContainer').innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Loading data...</p>
+                </div>
+            `;
+            
             const filePath = getFilePath(currentDate);
             const csvText = await loadCSV(filePath);
             
