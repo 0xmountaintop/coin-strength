@@ -79,8 +79,57 @@
             left: 0;
             top: 100%;
             margin-top: 5px;
-            padding: 5px;
+            padding: 10px;
             display: none;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 10px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-cell {
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .calendar-cell:hover {
+            background-color: #f0f0f0;
+        }
+
+        .calendar-cell.selected {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .calendar-weekday {
+            font-weight: bold;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .calendar-nav {
+            cursor: pointer;
+            padding: 5px;
+            background: none;
+            border: none;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -91,7 +140,22 @@
         <button class="nav-button" id="prevDay">← Previous Day</button>
         <div id="datePickerContainer">
             <span id="currentDate"></span>
-            <input type="date" id="datePicker">
+            <div id="datePicker">
+                <div class="calendar-header">
+                    <button class="calendar-nav" id="prevMonth">←</button>
+                    <span id="monthYear"></span>
+                    <button class="calendar-nav" id="nextMonth">→</button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-weekday">Su</div>
+                    <div class="calendar-weekday">Mo</div>
+                    <div class="calendar-weekday">Tu</div>
+                    <div class="calendar-weekday">We</div>
+                    <div class="calendar-weekday">Th</div>
+                    <div class="calendar-weekday">Fr</div>
+                    <div class="calendar-weekday">Sa</div>
+                </div>
+            </div>
         </div>
         <button class="nav-button" id="nextDay">Next Day →</button>
     </div>
@@ -99,16 +163,20 @@
     <div id="tableContainer"></div>
 
     <script>
-        let currentDate = new Date();
+        let currentDate = new Date(Date.UTC(
+            new Date().getUTCFullYear(),
+            new Date().getUTCMonth(),
+            new Date().getUTCDate()
+        ));
 
         function formatDate(date) {
-            return date.toISOString().split('T')[0];
+            return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
         }
 
         function getFilePath(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getUTCFullYear();
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(date.getUTCDate()).padStart(2, '0');
             return `results/${year}/${month}/${year}-${month}-${day}.csv`;
         }
 
@@ -207,13 +275,21 @@
 
         document.getElementById('prevDay').addEventListener('click', () => {
             window.lastNavigationDirection = -1;
-            currentDate.setDate(currentDate.getDate() - 1);
+            currentDate = new Date(Date.UTC(
+                currentDate.getUTCFullYear(),
+                currentDate.getUTCMonth(),
+                currentDate.getUTCDate() - 1
+            ));
             updateDisplay();
         });
 
         document.getElementById('nextDay').addEventListener('click', () => {
             window.lastNavigationDirection = 1;
-            currentDate.setDate(currentDate.getDate() + 1);
+            currentDate = new Date(Date.UTC(
+                currentDate.getUTCFullYear(),
+                currentDate.getUTCMonth(),
+                currentDate.getUTCDate() + 1
+            ));
             updateDisplay();
         });
 
@@ -221,11 +297,19 @@
         document.addEventListener('keydown', (event) => {
             if (event.key === 'ArrowLeft') {
                 window.lastNavigationDirection = -1;
-                currentDate.setDate(currentDate.getDate() - 1);
+                currentDate = new Date(Date.UTC(
+                    currentDate.getUTCFullYear(),
+                    currentDate.getUTCMonth(),
+                    currentDate.getUTCDate() - 1
+                ));
                 updateDisplay();
             } else if (event.key === 'ArrowRight') {
                 window.lastNavigationDirection = 1;
-                currentDate.setDate(currentDate.getDate() + 1);
+                currentDate = new Date(Date.UTC(
+                    currentDate.getUTCFullYear(),
+                    currentDate.getUTCMonth(),
+                    currentDate.getUTCDate() + 1
+                ));
                 updateDisplay();
             }
         });
@@ -233,24 +317,76 @@
         function setupDatePicker() {
             const currentDateSpan = document.getElementById('currentDate');
             const datePicker = document.getElementById('datePicker');
+            const monthYearSpan = document.getElementById('monthYear');
+            const calendarGrid = document.querySelector('.calendar-grid');
+            let viewDate = new Date();
+
+            function updateCalendar() {
+                const year = viewDate.getFullYear();
+                const month = viewDate.getMonth();
+                
+                monthYearSpan.textContent = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+                
+                // Clear existing date cells
+                const cells = calendarGrid.querySelectorAll('.calendar-cell');
+                cells.forEach(cell => cell.remove());
+
+                // Get first day of month and total days
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                // Add empty cells for days before first of month
+                for (let i = 0; i < firstDay; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'calendar-cell';
+                    calendarGrid.appendChild(cell);
+                }
+
+                // Add cells for each day
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'calendar-cell';
+                    cell.textContent = day;
+                    
+                    const cellDate = new Date(year, month, day);
+                    if (cellDate.toDateString() === currentDate.toDateString()) {
+                        cell.classList.add('selected');
+                    }
+
+                    cell.addEventListener('click', async () => {
+                        // Create date in UTC
+                        currentDate = new Date(Date.UTC(year, month, day));
+                        datePicker.style.display = 'none';
+                        await updateDisplay();
+                    });
+
+                    calendarGrid.appendChild(cell);
+                }
+            }
 
             currentDateSpan.addEventListener('click', () => {
-                datePicker.style.display = 'block';
-                datePicker.value = formatDate(currentDate);
-                datePicker.focus();
+                datePicker.style.display = datePicker.style.display === 'block' ? 'none' : 'block';
+                viewDate = new Date(currentDate);
+                updateCalendar();
             });
 
-            datePicker.addEventListener('change', async (e) => {
-                currentDate = new Date(e.target.value);
-                datePicker.style.display = 'none';
-                await updateDisplay();
+            document.getElementById('prevMonth').addEventListener('click', (e) => {
+                e.stopPropagation();
+                viewDate.setMonth(viewDate.getMonth() - 1);
+                updateCalendar();
             });
 
-            datePicker.addEventListener('blur', () => {
-                // Small delay to allow the change event to fire first
-                setTimeout(() => {
+            document.getElementById('nextMonth').addEventListener('click', (e) => {
+                e.stopPropagation();
+                viewDate.setMonth(viewDate.getMonth() + 1);
+                updateCalendar();
+            });
+
+            // Close calendar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!datePicker.contains(e.target) && !currentDateSpan.contains(e.target)) {
                     datePicker.style.display = 'none';
-                }, 200);
+                }
             });
         }
 
