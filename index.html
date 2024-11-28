@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Price Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f4f4f4;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .nav-button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        
+        #currentDate {
+            font-weight: bold;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crypto Price Viewer</h1>
+    
+    <div class="controls">
+        <button class="nav-button" id="prevDay">← Previous Day</button>
+        <span id="currentDate"></span>
+        <button class="nav-button" id="nextDay">Next Day →</button>
+    </div>
+    
+    <div id="tableContainer"></div>
+
+    <script>
+        let currentDate = new Date();
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function getFilePath(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `results/${year}/${month}/${year}-${month}-${day}.csv`;
+        }
+
+        async function loadCSV(filePath) {
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    throw new Error('CSV file not found');
+                }
+                const text = await response.text();
+                return text;
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                return null;
+            }
+        }
+
+        function renderCSV(csvText) {
+            if (!csvText) {
+                document.getElementById('tableContainer').innerHTML = '<p>No data available for this date.</p>';
+                return;
+            }
+
+            const rows = csvText.trim().split('\n');
+            const headers = rows[0].split(',');
+            
+            let tableHTML = '<table><thead><tr>';
+            headers.forEach(header => {
+                tableHTML += `<th>${header}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].split(',');
+                tableHTML += '<tr>';
+                cells.forEach(cell => {
+                    tableHTML += `<td>${cell}</td>`;
+                });
+                tableHTML += '</tr>';
+            }
+
+            tableHTML += '</tbody></table>';
+            document.getElementById('tableContainer').innerHTML = tableHTML;
+        }
+
+        async function updateDisplay() {
+            const dateStr = formatDate(currentDate);
+            document.getElementById('currentDate').textContent = dateStr;
+            const filePath = getFilePath(currentDate);
+            const csvText = await loadCSV(filePath);
+            renderCSV(csvText);
+        }
+
+        document.getElementById('prevDay').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            updateDisplay();
+        });
+
+        document.getElementById('nextDay').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 1);
+            updateDisplay();
+        });
+
+        // Handle keyboard navigation
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft') {
+                currentDate.setDate(currentDate.getDate() - 1);
+                updateDisplay();
+            } else if (event.key === 'ArrowRight') {
+                currentDate.setDate(currentDate.getDate() + 1);
+                updateDisplay();
+            }
+        });
+
+        // Initial load
+        updateDisplay();
+    </script>
+</body>
+</html>
