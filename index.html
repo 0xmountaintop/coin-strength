@@ -118,30 +118,75 @@
             document.getElementById('tableContainer').innerHTML = tableHTML;
         }
 
+        async function findNextAvailableDate(date, direction) {
+            const maxAttempts = 30; // Limit how far we look to avoid infinite loops
+            let attempts = 0;
+            let currentDate = new Date(date);
+
+            while (attempts < maxAttempts) {
+                const filePath = getFilePath(currentDate);
+                try {
+                    const response = await fetch(filePath);
+                    if (response.ok) {
+                        return currentDate;
+                    }
+                } catch (error) {
+                    console.error('Error checking file:', error);
+                }
+                
+                // Move to next/previous day based on direction
+                currentDate.setDate(currentDate.getDate() + direction);
+                attempts++;
+            }
+            return null; // Return null if no data found within maxAttempts
+        }
+
         async function updateDisplay() {
             const dateStr = formatDate(currentDate);
             document.getElementById('currentDate').textContent = dateStr;
             const filePath = getFilePath(currentDate);
             const csvText = await loadCSV(filePath);
-            renderCSV(csvText);
+            
+            if (!csvText) {
+                // If no data available, find next available date
+                const direction = window.lastNavigationDirection || 1;
+                const nextAvailableDate = await findNextAvailableDate(currentDate, direction);
+                
+                if (nextAvailableDate) {
+                    currentDate = nextAvailableDate;
+                    const newDateStr = formatDate(currentDate);
+                    document.getElementById('currentDate').textContent = newDateStr;
+                    const newFilePath = getFilePath(currentDate);
+                    const newCsvText = await loadCSV(newFilePath);
+                    renderCSV(newCsvText);
+                } else {
+                    document.getElementById('tableContainer').innerHTML = '<p>No data available for this date or nearby dates.</p>';
+                }
+            } else {
+                renderCSV(csvText);
+            }
         }
 
         document.getElementById('prevDay').addEventListener('click', () => {
+            window.lastNavigationDirection = -1;
             currentDate.setDate(currentDate.getDate() - 1);
             updateDisplay();
         });
 
         document.getElementById('nextDay').addEventListener('click', () => {
+            window.lastNavigationDirection = 1;
             currentDate.setDate(currentDate.getDate() + 1);
             updateDisplay();
         });
 
-        // Handle keyboard navigation
+        // Update keyboard navigation
         document.addEventListener('keydown', (event) => {
             if (event.key === 'ArrowLeft') {
+                window.lastNavigationDirection = -1;
                 currentDate.setDate(currentDate.getDate() - 1);
                 updateDisplay();
             } else if (event.key === 'ArrowRight') {
+                window.lastNavigationDirection = 1;
                 currentDate.setDate(currentDate.getDate() + 1);
                 updateDisplay();
             }
