@@ -49,13 +49,24 @@
             font-weight: bold;
             margin: 0 10px;
             cursor: pointer;
-            padding: 5px;
-            border: 1px solid transparent;
+            padding: 5px 25px 5px 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            position: relative;
+            background-color: #fff;
         }
         
         #currentDate:hover {
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            background-color: #f0f0f0;
+        }
+        
+        #currentDate::after {
+            content: "📅";
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
         }
         
         #datePickerContainer {
