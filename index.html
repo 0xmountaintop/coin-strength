@@ -136,6 +136,7 @@
             const headers = rows[0].split(',');
             
             let tableHTML = '<table><thead><tr>';
+            tableHTML += '<th>rank</th>';
             headers.forEach(header => {
                 tableHTML += `<th>${header}</th>`;
             });
@@ -144,6 +145,7 @@
             for (let i = 1; i < rows.length; i++) {
                 const cells = rows[i].split(',');
                 tableHTML += '<tr>';
+                tableHTML += `<td>${i}</td>`;
                 cells.forEach(cell => {
                     tableHTML += `<td>${cell}</td>`;
                 });
