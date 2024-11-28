@@ -48,6 +48,28 @@
         #currentDate {
             font-weight: bold;
             margin: 0 10px;
+            cursor: pointer;
+            padding: 5px;
+            border: 1px solid transparent;
+        }
+        
+        #currentDate:hover {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        #datePickerContainer {
+            position: relative;
+            display: inline-block;
+        }
+        
+        #datePicker {
+            position: absolute;
+            left: 0;
+            top: 100%;
+            margin-top: 5px;
+            padding: 5px;
+            display: none;
         }
     </style>
 </head>
@@ -56,7 +78,10 @@
     
     <div class="controls">
         <button class="nav-button" id="prevDay">← Previous Day</button>
-        <span id="currentDate"></span>
+        <div id="datePickerContainer">
+            <span id="currentDate"></span>
+            <input type="date" id="datePicker">
+        </div>
         <button class="nav-button" id="nextDay">Next Day →</button>
     </div>
     
@@ -192,7 +217,32 @@
             }
         });
 
+        function setupDatePicker() {
+            const currentDateSpan = document.getElementById('currentDate');
+            const datePicker = document.getElementById('datePicker');
+
+            currentDateSpan.addEventListener('click', () => {
+                datePicker.style.display = 'block';
+                datePicker.value = formatDate(currentDate);
+                datePicker.focus();
+            });
+
+            datePicker.addEventListener('change', async (e) => {
+                currentDate = new Date(e.target.value);
+                datePicker.style.display = 'none';
+                await updateDisplay();
+            });
+
+            datePicker.addEventListener('blur', () => {
+                // Small delay to allow the change event to fire first
+                setTimeout(() => {
+                    datePicker.style.display = 'none';
+                }, 200);
+            });
+        }
+
         // Initial load
+        setupDatePicker();
         updateDisplay();
     </script>
 </body>
