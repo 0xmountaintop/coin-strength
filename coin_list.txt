@@ -141,3 +141,6 @@ stader
 instadapp
 drift-protocol
 virtual-protocol
+
+graphlinq-protocol
+zignaly
