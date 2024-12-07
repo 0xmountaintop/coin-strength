@@ -76,7 +76,10 @@ function calculateInvestmentResults(coinData: CoinData, periods: Period[]): Coin
     throw new Error("Current price is not available");
   }
 
-  for (const period of periods) {
+  const today = new Date(DATE);
+  // get the most recent period before today, and make it an array (for compatibility with the legavy code)
+  const mostRecentPeriods = periods.filter(period => period.end < today).slice(-1);
+  for (const period of mostRecentPeriods) {
     const periodKey = `${period.start.toISOString()}_${period.end.toISOString()}`;
     const lowestPrice = coinData.lowestPrices[periodKey];
     const investmentAmount = 100;
