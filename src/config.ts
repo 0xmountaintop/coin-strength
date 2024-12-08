@@ -8,6 +8,7 @@ const DATE = process.env.DATE || new Date().toISOString().split('T')[0];
 const periods: Period[] = [
   { start: new Date('2024-08-04'), end: new Date('2024-08-06') },
   { start: new Date('2024-09-06'), end: new Date('2024-09-08') },
+  { start: new Date('2024-11-05'), end: new Date('2024-11-07') },
 ];
 
 export { PRICE_DATA_FILE, COIN_LIST_FILE, periods, DATE };
