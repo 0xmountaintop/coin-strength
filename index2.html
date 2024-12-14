@@ -152,9 +152,9 @@
                     
                     // Populate period selector
                     const periodSelector = document.getElementById('periodSelector');
-                    configPeriods.forEach((period, index) => {
+                    [...configPeriods].reverse().forEach((period, index) => {
                         const option = document.createElement('option');
-                        option.value = index.toString();
+                        option.value = (configPeriods.length - 1 - index).toString();
                         option.textContent = `${formatDate(period.startDate)} to ${formatDate(period.endDate)}`;
                         periodSelector.appendChild(option);
                     });
