@@ -120,7 +120,7 @@
         </div>
     </div>
     
-    <button id="toggleLabels" class="control-button">Toggle All Coins</button>
+    <button id="toggleLabels" class="control-button">Hide All</button>
     <div class="chart-container">
         <canvas id="priceChart"></canvas>
         <div class="loading" id="loadingIndicator" style="display: none;">
@@ -265,9 +265,9 @@
                 if (coinData.length === 0) return;
                 
                 const latestValue = coinData[coinData.length - 1].value;
-                // // Only add coins that performed better than Bitcoin
-                // if (latestValue >= btcLatestValue) {
-                if (true) {
+                // Only add coins that performed better than Bitcoin
+                if (latestValue >= btcLatestValue) {
+                // if (true) {
                     datasets.push({
                         label: coin,
                         data: coinData.map(d => ({
@@ -334,7 +334,7 @@
         function toggleLabels() {
             labelsVisible = !labelsVisible;
             const button = document.getElementById('toggleLabels');
-            // button.textContent = labelsVisible ? 'Hide All' : 'Show All';
+            button.textContent = labelsVisible ? 'Hide All' : 'Show All';
             
             if (priceChart) {
                 priceChart.data.datasets.forEach(dataset => {
