@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Price Trends</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 600px;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        select, input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        #coinSelector {
+            min-width: 200px;
+        }
+
+        .range-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #daysRange {
+            width: 80px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .date-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .date-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .control-button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f4f4f4;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .control-button:hover {
+            background: #e4e4e4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cryptocurrency Price Trends</h1>
+    
+    <div class="controls">
+        <div class="date-inputs">
+            <select id="periodSelector">
+            </select>
+        </div>
+    </div>
+    
+    <button id="toggleLabels" class="control-button">Toggle All Coins</button>
+    <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+        <div class="loading" id="loadingIndicator" style="display: none;">
+            <div class="loading-spinner"></div>
+            <div>Loading data...</div>
+        </div>
+    </div>
+
+    <script>
+        const CHART_COLORS = [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+            '#FF9F40', '#FF6384', '#C9CBCF', '#7BC225', '#B56DFF'
+        ];
+
+        let priceChart = null;
+        let configPeriods = [];
+        let labelsVisible = true;
+        
+        // Load and parse config periods
+        async function loadConfigPeriods() {
+            try {
+                const response = await fetch('src/config.ts');
+                const text = await response.text();
+                
+                // Extract periods array using regex
+                const periodsMatch = text.match(/const periods: Period\[\] = \[([\s\S]*?)\];/);
+                if (periodsMatch) {
+                    const periodsText = periodsMatch[1];
+                    // Parse the periods using Function constructor
+                    const periodsFunc = new Function(`return [${periodsText}]`);
+                    const periods = periodsFunc();
+                    
+                    // Generate date ranges based on periods
+                    configPeriods = [];
+                    for (let i = 0; i < periods.length; i++) {
+                        const startDate = new Date(periods[i].end.getTime() + 86400000);
+                        
+                        const endDate = i === periods.length - 1 ? 
+                            new Date() : // current date for last range
+                            new Date(periods[i+1].end);
+                        
+                        configPeriods.push({ startDate, endDate });
+                    }
+                    
+                    // Populate period selector
+                    const periodSelector = document.getElementById('periodSelector');
+                    [...configPeriods].reverse().forEach((period, index) => {
+                        const option = document.createElement('option');
+                        option.value = (configPeriods.length - 1 - index).toString();
+                        option.textContent = `${formatDate(period.startDate)} to ${formatDate(period.endDate)}`;
+                        periodSelector.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+        
+        function formatDate(date) {
+            return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+        }
+
+        function getFilePath(date) {
+            const year = date.getUTCFullYear();
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            return `results/${year}/${month}/${year}-${month}-${day}.csv`;
+        }
+
+        async function loadCSV(filePath) {
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    throw new Error('CSV file not found');
+                }
+                return await response.text();
+            } catch (error) {
+                console.warn('Error loading CSV:', error);
+                return null;
+            }
+        }
+
+        async function fetchHistoricalData() {
+            const period = configPeriods[parseInt(document.getElementById('periodSelector').value)];
+            const startDate = period.startDate;
+            const endDate = period.endDate;
+            const data = {};
+            
+            showLoading(true);
+            
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const filePath = getFilePath(d);
+                const csvText = await loadCSV(filePath);
+                
+                if (csvText) {
+                    const rows = csvText.trim().split('\n');
+                    const records = rows.slice(1).map(row => {
+                        const [coin, totalValue] = row.split(',');
+                        return { coin, totalValue: parseFloat(totalValue) };
+                    });
+                    
+                    records.forEach(({ coin, totalValue }) => {
+                        if (!data[coin]) {
+                            data[coin] = [];
+                        }
+                        data[coin].push({
+                            date: new Date(d),
+                            value: totalValue
+                        });
+                    });
+                }
+            }
+            
+            showLoading(false);
+            return data;
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
+        }
+
+        async function updateChart() {
+            const data = await fetchHistoricalData();
+            
+            if (priceChart) {
+                priceChart.destroy();
+            }
+            
+            // Get Bitcoin's latest value
+            const btcData = data['bitcoin'] || [];
+            if (btcData.length === 0) {
+                console.error('Bitcoin data not found');
+                return;
+            }
+            const btcLatestValue = btcData[btcData.length - 1].value;
+            
+            const datasets = [];
+            const coins = Object.keys(data).sort((a, b) => a.localeCompare(b));
+            
+            coins.forEach((coin, index) => {
+                const coinData = data[coin];
+                if (coinData.length === 0) return;
+                
+                const latestValue = coinData[coinData.length - 1].value;
+                // // Only add coins that performed better than Bitcoin
+                // if (latestValue >= btcLatestValue) {
+                if (true) {
+                    datasets.push({
+                        label: coin,
+                        data: coinData.map(d => ({
+                            x: d.date,
+                            y: d.value
+                        })),
+                        borderColor: CHART_COLORS[index % CHART_COLORS.length],
+                        fill: false,
+                        tension: 0.1,
+                        hidden: !labelsVisible
+                    });
+                }
+            });
+            
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    plugins: {
+                        tooltip: {
+                            position: 'nearest'
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'MMM d, yyyy'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Value ($)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add toggle labels function
+        function toggleLabels() {
+            labelsVisible = !labelsVisible;
+            const button = document.getElementById('toggleLabels');
+            // button.textContent = labelsVisible ? 'Hide All' : 'Show All';
+            
+            if (priceChart) {
+                priceChart.data.datasets.forEach(dataset => {
+                    dataset.hidden = !labelsVisible;
+                });
+                priceChart.update();
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('periodSelector').addEventListener('change', (e) => {
+            updateChart();
+        });
+
+        document.getElementById('toggleLabels').addEventListener('click', toggleLabels);
+
+        // Initialize
+        loadConfigPeriods().then(() => {
+            updateChart();
+        });
+    </script>
+</body>
+</html> 
