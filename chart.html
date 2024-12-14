@@ -265,9 +265,9 @@
                 if (coinData.length === 0) return;
                 
                 const latestValue = coinData[coinData.length - 1].value;
-                // // Only add coins that performed better than Bitcoin
-                // if (latestValue >= btcLatestValue) {
-                if (true) {
+                // Only add coins that performed better than Bitcoin
+                if (latestValue >= btcLatestValue) {
+                // if (true) {
                     datasets.push({
                         label: coin,
                         data: coinData.map(d => ({
