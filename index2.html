@@ -101,13 +101,9 @@
     <h1>Cryptocurrency Price Trends</h1>
     
     <div class="controls">
-        <select id="coinSelector" multiple>
-            <option value="all" selected>All Coins</option>
-        </select>
         <div class="date-inputs">
-            <input type="date" id="startDate" class="date-input">
-            <span>to</span>
-            <input type="date" id="endDate" class="date-input">
+            <select id="periodSelector">
+            </select>
         </div>
     </div>
 
@@ -126,18 +122,46 @@
         ];
 
         let priceChart = null;
-        let selectedCoins = new Set(['all']);
+        let configPeriods = [];
         
-        // Initialize date inputs with default values
-        const today = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(today.getDate() - 30);
-        
-        document.getElementById('startDate').value = formatDateForInput(thirtyDaysAgo);
-        document.getElementById('endDate').value = formatDateForInput(today);
-        
-        function formatDateForInput(date) {
-            return date.toISOString().split('T')[0];
+        // Load and parse config periods
+        async function loadConfigPeriods() {
+            try {
+                const response = await fetch('src/config.ts');
+                const text = await response.text();
+                
+                // Extract periods array using regex
+                const periodsMatch = text.match(/const periods: Period\[\] = \[([\s\S]*?)\];/);
+                if (periodsMatch) {
+                    const periodsText = periodsMatch[1];
+                    // Parse the periods using Function constructor
+                    const periodsFunc = new Function(`return [${periodsText}]`);
+                    const periods = periodsFunc();
+                    
+                    // Generate date ranges based on periods
+                    configPeriods = [];
+                    for (let i = 0; i < periods.length; i++) {
+                        const startDate = new Date(periods[i].end.getTime() + 86400000);
+                        
+                        const endDate = i === periods.length - 1 ? 
+                            new Date() : // current date for last range
+                            new Date(periods[i+1].end);
+                        
+                        configPeriods.push({ startDate, endDate });
+                    }
+                    
+                    // Populate period selector
+                    const periodSelector = document.getElementById('periodSelector');
+                    configPeriods.forEach((period, index) => {
+                        const option = document.createElement('option');
+                        option.value = index.toString();
+                        option.textContent = `${formatDate(period.startDate)} to ${formatDate(period.endDate)}`;
+                        periodSelector.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
         }
         
         function formatDate(date) {
@@ -165,8 +189,9 @@
         }
 
         async function fetchHistoricalData() {
-            const startDate = new Date(document.getElementById('startDate').value);
-            const endDate = new Date(document.getElementById('endDate').value);
+            const period = configPeriods[parseInt(document.getElementById('periodSelector').value)];
+            const startDate = period.startDate;
+            const endDate = period.endDate;
             const data = {};
             
             showLoading(true);
@@ -202,17 +227,6 @@
             document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
         }
 
-        function updateCoinSelector(coins) {
-            const selector = document.getElementById('coinSelector');
-            selector.innerHTML = '<option value="all">All Coins</option>';
-            coins.forEach(coin => {
-                const option = document.createElement('option');
-                option.value = coin;
-                option.textContent = coin;
-                selector.appendChild(option);
-            });
-        }
-
         async function updateChart() {
             const data = await fetchHistoricalData();
             
@@ -222,21 +236,18 @@
             
             const datasets = [];
             const coins = Object.keys(data).sort((a, b) => a.localeCompare(b));
-            updateCoinSelector(coins);
             
             coins.forEach((coin, index) => {
-                if (selectedCoins.has('all') || selectedCoins.has(coin)) {
-                    datasets.push({
-                        label: coin,
-                        data: data[coin].map(d => ({
-                            x: d.date,
-                            y: d.value
-                        })),
-                        borderColor: CHART_COLORS[index % CHART_COLORS.length],
-                        fill: false,
-                        tension: 0.1
-                    });
-                }
+                datasets.push({
+                    label: coin,
+                    data: data[coin].map(d => ({
+                        x: d.date,
+                        y: d.value
+                    })),
+                    borderColor: CHART_COLORS[index % CHART_COLORS.length],
+                    fill: false,
+                    tension: 0.1
+                });
             });
             
             const ctx = document.getElementById('priceChart').getContext('2d');
@@ -288,18 +299,14 @@
         }
 
         // Event Listeners
-        document.getElementById('coinSelector').addEventListener('change', (e) => {
-            selectedCoins = new Set(
-                Array.from(e.target.selectedOptions).map(option => option.value)
-            );
+        document.getElementById('periodSelector').addEventListener('change', (e) => {
             updateChart();
         });
 
-        document.getElementById('startDate').addEventListener('change', updateChart);
-        document.getElementById('endDate').addEventListener('change', updateChart);
-
-        // Initial chart load
-        updateChart();
+        // Initialize
+        loadConfigPeriods().then(() => {
+            updateChart();
+        });
     </script>
 </body>
 </html> 
