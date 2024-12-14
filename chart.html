@@ -95,6 +95,19 @@
             border-radius: 4px;
             font-size: 14px;
         }
+
+        .control-button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f4f4f4;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .control-button:hover {
+            background: #e4e4e4;
+        }
     </style>
 </head>
 <body>
@@ -106,7 +119,8 @@
             </select>
         </div>
     </div>
-
+    
+    <button id="toggleLabels" class="control-button">Toggle All Coins</button>
     <div class="chart-container">
         <canvas id="priceChart"></canvas>
         <div class="loading" id="loadingIndicator" style="display: none;">
@@ -123,6 +137,7 @@
 
         let priceChart = null;
         let configPeriods = [];
+        let labelsVisible = true;
         
         // Load and parse config periods
         async function loadConfigPeriods() {
@@ -234,20 +249,37 @@
                 priceChart.destroy();
             }
             
+            // Get Bitcoin's latest value
+            const btcData = data['bitcoin'] || [];
+            if (btcData.length === 0) {
+                console.error('Bitcoin data not found');
+                return;
+            }
+            const btcLatestValue = btcData[btcData.length - 1].value;
+            
             const datasets = [];
             const coins = Object.keys(data).sort((a, b) => a.localeCompare(b));
             
             coins.forEach((coin, index) => {
-                datasets.push({
-                    label: coin,
-                    data: data[coin].map(d => ({
-                        x: d.date,
-                        y: d.value
-                    })),
-                    borderColor: CHART_COLORS[index % CHART_COLORS.length],
-                    fill: false,
-                    tension: 0.1
-                });
+                const coinData = data[coin];
+                if (coinData.length === 0) return;
+                
+                const latestValue = coinData[coinData.length - 1].value;
+                // // Only add coins that performed better than Bitcoin
+                // if (latestValue >= btcLatestValue) {
+                if (true) {
+                    datasets.push({
+                        label: coin,
+                        data: coinData.map(d => ({
+                            x: d.date,
+                            y: d.value
+                        })),
+                        borderColor: CHART_COLORS[index % CHART_COLORS.length],
+                        fill: false,
+                        tension: 0.1,
+                        hidden: !labelsVisible
+                    });
+                }
             });
             
             const ctx = document.getElementById('priceChart').getContext('2d');
@@ -298,10 +330,26 @@
             });
         }
 
+        // Add toggle labels function
+        function toggleLabels() {
+            labelsVisible = !labelsVisible;
+            const button = document.getElementById('toggleLabels');
+            // button.textContent = labelsVisible ? 'Hide All' : 'Show All';
+            
+            if (priceChart) {
+                priceChart.data.datasets.forEach(dataset => {
+                    dataset.hidden = !labelsVisible;
+                });
+                priceChart.update();
+            }
+        }
+
         // Event Listeners
         document.getElementById('periodSelector').addEventListener('change', (e) => {
             updateChart();
         });
+
+        document.getElementById('toggleLabels').addEventListener('click', toggleLabels);
 
         // Initialize
         loadConfigPeriods().then(() => {
