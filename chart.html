@@ -120,7 +120,7 @@
         </div>
     </div>
     
-    <button id="toggleLabels" class="control-button">Toggle All Coins</button>
+    <button id="toggleLabels" class="control-button">Hide All</button>
     <div class="chart-container">
         <canvas id="priceChart"></canvas>
         <div class="loading" id="loadingIndicator" style="display: none;">
@@ -334,7 +334,7 @@
         function toggleLabels() {
             labelsVisible = !labelsVisible;
             const button = document.getElementById('toggleLabels');
-            // button.textContent = labelsVisible ? 'Hide All' : 'Show All';
+            button.textContent = labelsVisible ? 'Hide All' : 'Show All';
             
             if (priceChart) {
                 priceChart.data.datasets.forEach(dataset => {
