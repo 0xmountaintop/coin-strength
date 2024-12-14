@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Returns Viewer</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -153,37 +152,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .view-controls {
-            margin: 20px 0;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin: 20px 0;
-        }
-        
-        .view-toggle {
-            padding: 8px 16px;
-            cursor: pointer;
-            background: #f4f4f4;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        .view-toggle.active {
-            background: #007bff;
-            color: white;
-        }
-        
-        #coinSelector {
-            padding: 8px;
-            min-width: 200px;
-        }
     </style>
 </head>
 <body>
@@ -213,20 +181,7 @@
         <button class="nav-button" id="nextDay">Next Day →</button>
     </div>
     
-    <div class="view-controls">
-        <button class="view-toggle active" data-view="table">Table View</button>
-        <button class="view-toggle" data-view="chart">Chart View</button>
-        <select id="coinSelector" multiple>
-            <option value="all" selected>All Coins</option>
-        </select>
-        <input type="number" id="daysRange" value="30" min="1" max="365" style="width: 80px;">
-        <label for="daysRange">days</label>
-    </div>
-    
     <div id="tableContainer"></div>
-    <div id="chartContainer" class="chart-container" style="display: none;">
-        <canvas id="priceChart"></canvas>
-    </div>
 
     <script>
         let currentDate = new Date(Date.UTC(
@@ -468,135 +423,6 @@
         // Initial load
         setupDatePicker();
         updateDisplay();
-
-        let priceChart = null;
-        let selectedCoins = new Set(['all']);
-        
-        function setupViewToggle() {
-            const toggles = document.querySelectorAll('.view-toggle');
-            toggles.forEach(toggle => {
-                toggle.addEventListener('click', () => {
-                    toggles.forEach(t => t.classList.remove('active'));
-                    toggle.classList.add('active');
-                    
-                    const view = toggle.dataset.view;
-                    document.getElementById('tableContainer').style.display = view === 'table' ? 'block' : 'none';
-                    document.getElementById('chartContainer').style.display = view === 'chart' ? 'block' : 'none';
-                    
-                    if (view === 'chart') {
-                        updateChart();
-                    }
-                });
-            });
-        }
-        
-        async function fetchHistoricalData(days) {
-            const data = {};
-            const endDate = new Date(currentDate);
-            const startDate = new Date(endDate);
-            startDate.setDate(startDate.getDate() - days);
-            
-            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                const filePath = getFilePath(d);
-                try {
-                    const csvText = await loadCSV(filePath);
-                    if (csvText) {
-                        const rows = csvText.trim().split('\n');
-                        const records = rows.slice(1).map(row => {
-                            const [coin, totalValue] = row.split(',');
-                            return { coin, totalValue: parseFloat(totalValue) };
-                        });
-                        
-                        records.forEach(({ coin, totalValue }) => {
-                            if (!data[coin]) {
-                                data[coin] = [];
-                            }
-                            data[coin].push({
-                                date: new Date(d),
-                                value: totalValue
-                            });
-                        });
-                    }
-                } catch (error) {
-                    console.warn(`No data for ${formatDate(d)}`);
-                }
-            }
-            return data;
-        }
-        
-        function updateCoinSelector(coins) {
-            const selector = document.getElementById('coinSelector');
-            selector.innerHTML = '<option value="all">All Coins</option>';
-            coins.forEach(coin => {
-                const option = document.createElement('option');
-                option.value = coin;
-                option.textContent = coin;
-                selector.appendChild(option);
-            });
-        }
-        
-        async function updateChart() {
-            const days = parseInt(document.getElementById('daysRange').value);
-            const data = await fetchHistoricalData(days);
-            
-            if (priceChart) {
-                priceChart.destroy();
-            }
-            
-            const datasets = [];
-            const coins = Object.keys(data);
-            updateCoinSelector(coins);
-            
-            coins.forEach((coin, index) => {
-                if (selectedCoins.has('all') || selectedCoins.has(coin)) {
-                    datasets.push({
-                        label: coin,
-                        data: data[coin].map(d => ({
-                            x: d.date,
-                            y: d.value
-                        })),
-                        borderColor: CHART_COLORS[index % CHART_COLORS.length],
-                        fill: false,
-                        tension: 0.1
-                    });
-                }
-            });
-            
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            priceChart = new Chart(ctx, {
-                type: 'line',
-                data: { datasets },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day'
-                            }
-                        },
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-        
-        document.getElementById('coinSelector').addEventListener('change', (e) => {
-            selectedCoins = new Set(
-                Array.from(e.target.selectedOptions).map(option => option.value)
-            );
-            updateChart();
-        });
-        
-        document.getElementById('daysRange').addEventListener('change', () => {
-            updateChart();
-        });
-        
-        // Initialize view toggle and chart
-        setupViewToggle();
     </script>
 </body>
 </html>

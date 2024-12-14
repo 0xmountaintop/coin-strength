@@ -17,7 +17,4 @@ const CHART_COLORS = [
   '#FF9F40', '#FF6384', '#C9CBCF', '#7BC225', '#B56DFF'
 ];
 
-// Add a new export for the frontend
-export const RESULTS_DIR = 'results';
-
 export { PRICE_DATA_FILE, COIN_LIST_FILE, periods, DATE, CHART_COLORS };
