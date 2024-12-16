@@ -150,3 +150,5 @@ blockstack
 dogecoin
 
 livepeer
+
+dinero-2
