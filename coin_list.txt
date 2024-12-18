@@ -152,3 +152,5 @@ dogecoin
 livepeer
 
 dinero-2
+
+bitget-token
