@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Returns Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -152,15 +153,55 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .github-link {
+            position: absolute;
+            top: 50px;
+            right: 270px;
+            font-size: 30px;
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .github-link:hover {
+            color: #666;
+        }
+        
+        .chart-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        
+        .chart-link:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .chart-link i {
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
+    <a href="https://github.com/0xmountaintop/coin-strength/" class="github-link" target="_blank">
+        <i class="fab fa-github"></i>
+    </a>
+
     <h1>Crypto Returns Viewer</h1>
 
-    <a href="https://github.com/0xmountaintop/coin-strength/" class="nav-button" style="margin-left: 10px;">Github</a>
-    </br>
-    </br>
-    <a href="chart.html" class="nav-button" style="margin-left: 10px;">Visualized as charts →</a>
+    <a href="chart.html" class="chart-link">
+        Visualized as Charts <i class="fas fa-chart-line"></i>
+    </a>
     
     <div class="controls">
         <button class="nav-button" id="prevDay">← Previous Day</button>
