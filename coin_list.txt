@@ -5,6 +5,8 @@
 # morphware
 # chasm
 # grass
+# puffer-finance
+# pudgy-penguins
 
 # --------------------------------
 
@@ -154,3 +156,4 @@ livepeer
 dinero-2
 
 bitget-token
+across-protocol
