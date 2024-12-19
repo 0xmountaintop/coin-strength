@@ -3,7 +3,7 @@ simon-s-cat
 xnet-mobile-2
 hilo-2
 morphware
-chasm
+chasm-ai
 grass
 puffer-finance
 pudgy-penguins
