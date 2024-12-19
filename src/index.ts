@@ -73,7 +73,8 @@ function calculateInvestmentResults(coinData: CoinData, periods: Period[]): Coin
   let totalCurrentValue = 0;
 
   if (!coinData.currentPrice) {
-    throw new Error("Current price is not available");
+    coinData.currentPrice = 0;
+    // throw new Error("Current price is not available");
   }
 
   const today = new Date(DATE);

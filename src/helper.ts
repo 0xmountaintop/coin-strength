@@ -13,7 +13,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 function findLowestPrice(priceData: [number, number][]): LowestPriceWithDate {
   let lowestPrice = Infinity;
-  let lowestPriceDate = new Date();
+  let lowestPriceDate = new Date(0);
 
   priceData.forEach(([timestamp, price]) => {
     if (price < lowestPrice) {
