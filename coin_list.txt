@@ -154,3 +154,7 @@ livepeer
 dinero-2
 
 bitget-token
+
+puffer-finance
+pudgy-penguins
+across-protocol
