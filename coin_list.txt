@@ -157,3 +157,4 @@ dinero-2
 
 bitget-token
 across-protocol
+hyperliquid
