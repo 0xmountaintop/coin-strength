@@ -158,3 +158,6 @@ dinero-2
 bitget-token
 across-protocol
 hyperliquid
+
+freysa-ai
+build-on-bnb
