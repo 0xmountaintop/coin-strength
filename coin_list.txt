@@ -161,3 +161,4 @@ hyperliquid
 
 freysa-ai
 build-on-bnb
+fartcoin
