@@ -10,6 +10,7 @@ const periods: Period[] = [
   { start: new Date('2024-09-06'), end: new Date('2024-09-08') }, // BTC dip
   { start: new Date('2024-11-05'), end: new Date('2024-11-07') }, // trump win
   { start: new Date('2024-12-05'), end: new Date('2024-12-07') }, // BTC dip
+  { start: new Date('2024-12-19'), end: new Date('2024-12-21') }, // alt crash
 ];
 
 export { PRICE_DATA_FILE, COIN_LIST_FILE, periods, DATE };
