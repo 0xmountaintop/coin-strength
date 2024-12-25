@@ -7,6 +7,7 @@ chasm-ai
 grass
 puffer-finance
 pudgy-penguins
+contango
 
 # --------------------------------
 
