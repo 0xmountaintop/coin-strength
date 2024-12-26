@@ -108,6 +108,41 @@
         .control-button:hover {
             background: #e4e4e4;
         }
+
+        .labels-container {
+            margin: 10px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .searchable-labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .label-item {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .label-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .label-item.hidden {
+            opacity: 0.5;
+            transform: none;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -121,6 +156,9 @@
     </div>
     
     <button id="toggleLabels" class="control-button">Hide All</button>
+    <div class="labels-container">
+        <div id="searchableLabels" class="searchable-labels"></div>
+    </div>
     <div class="chart-container">
         <canvas id="priceChart"></canvas>
         <div class="loading" id="loadingIndicator" style="display: none;">
@@ -242,6 +280,27 @@
             document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
         }
 
+        function updateSearchableLabels(datasets) {
+            const container = document.getElementById('searchableLabels');
+            container.innerHTML = '';
+            
+            datasets.forEach((dataset, index) => {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = `label-item${dataset.hidden ? ' hidden' : ''}`;
+                labelDiv.textContent = dataset.label;
+                labelDiv.style.backgroundColor = dataset.borderColor;
+                
+                // Toggle visibility when clicking on label
+                labelDiv.addEventListener('click', () => {
+                    dataset.hidden = !dataset.hidden;
+                    labelDiv.classList.toggle('hidden');
+                    priceChart.update();
+                });
+                
+                container.appendChild(labelDiv);
+            });
+        }
+
         async function updateChart() {
             const data = await fetchHistoricalData();
             
@@ -298,10 +357,7 @@
                             position: 'nearest'
                         },
                         legend: {
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true
-                            }
+                            display: false
                         }
                     },
                     scales: {
@@ -328,6 +384,8 @@
                     }
                 }
             });
+            
+            updateSearchableLabels(datasets);
         }
 
         // Add toggle labels function
@@ -341,6 +399,8 @@
                     dataset.hidden = !labelsVisible;
                 });
                 priceChart.update();
+                
+                updateSearchableLabels(priceChart.data.datasets);
             }
         }
 
