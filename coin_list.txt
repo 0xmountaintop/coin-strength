@@ -166,3 +166,7 @@ fartcoin
 meow
 dog-with-apple-in-mouth
 aixbt
+
+euler
+inverse-finance
+spectra-finance
