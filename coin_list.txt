@@ -170,3 +170,4 @@ aixbt
 euler
 inverse-finance
 spectra-finance
+duck-ai
