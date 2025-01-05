@@ -171,3 +171,6 @@ euler
 inverse-finance
 spectra-finance
 duck-ai
+
+ava-ai
+swarms
