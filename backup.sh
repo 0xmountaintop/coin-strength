@@ -12,6 +12,15 @@
 
 ########################
 
+# yarn ts-node src/tools/dispatch-workflow.ts \
+#   --owner 0xmountaintop \
+#   --repo coin-strength \
+#   --workflow price-fetcher.yml \
+#   --ref main \
+#   --inputs '{"DATE":"2024-03-20"}'
+
+########################
+
 # git fetch --prune
 
 ########################

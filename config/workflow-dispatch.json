@@ -1,0 +1,9 @@
+{
+  "owner": "your-github-username",
+  "repo": "your-repo-name",
+  "workflow_id": "price-fetcher.yml",
+  "ref": "main",
+  "inputs": {
+    "DATE": "2024-03-20"
+  }
+} 
