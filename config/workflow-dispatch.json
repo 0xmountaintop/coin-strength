@@ -1,6 +1,6 @@
 {
-  "owner": "your-github-username",
-  "repo": "your-repo-name",
+  "owner": "0xmountaintop",
+  "repo": "coin-strength",
   "workflow_id": "price-fetcher.yml",
   "ref": "main",
   "inputs": {
