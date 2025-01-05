@@ -1,5 +1,5 @@
-# start_date="2024-09-07"
-# end_date="2024-10-31"
+# start_date="2024-12-22"
+# end_date="2024-12-31"
 # repo="git@github.com:0xmountaintop/coin-strength.git"
 
 # current_date="$start_date"
