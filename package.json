@@ -1,11 +1,13 @@
 {
   "name": "coin-strength",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "npx http-server .",
-    "start": "./node_modules/.bin/ts-node src/index.ts"
+    "start": "./node_modules/.bin/ts-node src/index.ts",
+    "dispatch": "NODE_OPTIONS='--loader ts-node/esm' node src/tools/dispatch-workflow.ts"
   },
   "keywords": [],
   "author": "",
@@ -13,14 +15,14 @@
   "description": "",
   "dependencies": {
     "@octokit/rest": "^21.0.2",
-    "@types/node": "^22.7.5",
+    "@types/node": "^22.10.5",
     "axios": "^1.7.7",
     "csv-parse": "^5.5.6",
     "csv-stringify": "^6.5.1",
     "dotenv": "^16.4.7",
     "http-server": "^14.1.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2",
+    "typescript": "^5.7.2",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
