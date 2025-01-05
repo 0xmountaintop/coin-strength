@@ -26,7 +26,7 @@ jobs:
         run: yarn install
 
       - name: Run price fetcher
-        run: ./node_modules/.bin/ts-node src/index.ts
+        run: yarn start
         env:
           DATE: ${{ github.event.inputs.DATE }}
 

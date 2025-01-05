@@ -1,0 +1,9 @@
+{
+  "owner": "0xmountaintop",
+  "repo": "coin-strength",
+  "workflow_id": "price-fetcher.yml",
+  "ref": "main",
+  "inputs": {
+    "DATE": "2024-03-20"
+  }
+} 
