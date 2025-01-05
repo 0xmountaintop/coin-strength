@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "npx http-server .",
-    "start": "./node_modules/.bin/ts-node src/index.ts",
+    "start": "NODE_OPTIONS='--loader ts-node/esm' node src/index.ts",
     "dispatch": "NODE_OPTIONS='--loader ts-node/esm' node src/tools/dispatch-workflow.ts"
   },
   "keywords": [],
