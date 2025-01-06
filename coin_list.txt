@@ -174,3 +174,9 @@ duck-ai
 
 ava-ai
 swarms
+
+fetch-ai
+woo-network
+vanar-chain
+media-licensing-token
+tars-protocol
