@@ -1,5 +1,5 @@
-# start_date="2024-12-22"
-# end_date="2024-12-32"
+# start_date="2025-01-15"
+# end_date="2025-01-29"
 # repo="git@github.com:0xmountaintop/coin-strength.git"
 
 # current_date="$start_date"
@@ -12,8 +12,8 @@
 
 ########################
 
-# start_date="2024-12-22"
-# end_date="2024-12-32"
+# start_date="2025-01-15"
+# end_date="2025-01-16"
 
 # current_date="$start_date"
 # while [[ "$current_date" < "$end_date" ]]; do
@@ -38,6 +38,8 @@
 ########################
 
 # git fetch --prune
+
+# git branch | grep -v "master" | xargs git branch -D
 
 ########################
 
