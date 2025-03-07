@@ -1,5 +1,5 @@
-# start_date="2025-01-15"
-# end_date="2025-01-29"
+# start_date="2025-03-02"
+# end_date="2025-03-07"
 # repo="git@github.com:0xmountaintop/coin-strength.git"
 
 # current_date="$start_date"
@@ -12,8 +12,8 @@
 
 ########################
 
-# start_date="2025-01-15"
-# end_date="2025-01-16"
+# start_date="2025-03-02"
+# end_date="2025-03-07"
 
 # current_date="$start_date"
 # while [[ "$current_date" < "$end_date" ]]; do
