@@ -12,8 +12,9 @@
 # --------------------------------
 
 bitcoin
-solana
 ethereum
+solana
+sui
 #spx6900
 #harrypotterobamasonic10in
 #woman-yelling-at-cat
